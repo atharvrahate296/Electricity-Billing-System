@@ -1,0 +1,13 @@
+# Compiled output
+target/
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# IDE and environment files
+.vscode/
+.env
+
