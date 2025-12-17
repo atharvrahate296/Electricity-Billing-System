@@ -32,25 +32,35 @@ However, if the `lib/` directory is empty or if you need to download a specific 
     *   **Purpose:** The JDBC driver for MySQL connectivity.
     *   **Download Link:** [https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar](https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar)
 
+-   **jbcrypt-0.4.jar:**
+    *   **Purpose:** A library for securely hashing and verifying passwords using the BCrypt algorithm.
+    *   **Download Instructions:**
+        1. Visit mindrot official website : [https://www.mindrot.org/projects/jBCrypt/](https://repo1.maven.org/maven2/org/mindrot/jbcrypt/0.4/)
+        2. Download the file `jbcrypt-0.4.jar`
+        3. Place the JAR file into the `lib/` directory of your project
+    *   **Note:** JBCrypt is used by the `PasswordHasher.java` class for password hashing and verification in the authentication system.
+
 After downloading, simply place the JAR files into the `lib/` directory.
 
 ## Detailed Database Setup Commands
 
-While the `README.md` file provides instructions to create a database, here are the specific SQL commands you can use after connecting to your MySQL server via the command line (`mysql -u root -p`) or a GUI client like MySQL Workbench.
+While the `README.md` file provides instructions to create a database, you can use the SQL queries provided in the `init_queries.sql` file to set up your database.
 
-```sql
--- Create the database if it doesn't already exist.
-CREATE DATABASE IF NOT EXISTS electricity_billing_database;
+**Steps:**
 
--- Switch to the newly created database to execute subsequent commands in its context.
-USE electricity_billing_database;
+1. Connect to your MySQL server using the command line (`mysql -u root -p`) or a GUI client like MySQL Workbench.
 
--- You can verify that the database was created and you are using it with these commands:
-SHOW DATABASES; -- Should list 'electricity_billing_database'
-SELECT DATABASE(); -- Should return 'electricity_billing_database'
-```
+2. Execute the `init_queries.sql` file, which contains all the necessary initialization commands:
+   ```bash
+   mysql -u root -p < init_queries.sql
+   ```
+   Or if using MySQL Workbench, open the `init_queries.sql` file and execute it.
 
-The application is designed to automatically create the required tables (`admin`, `user`, `bill`) on its first successful connection to the database.
+3. The `init_queries.sql` file includes:
+   - Database creation (`electricity_billing_database`)
+   - All necessary setup commands for the database
+
+The application is designed to automatically create the required tables (`admin`, `user`, `bill`) on its first successful connection to the database if they do not already exist.
 
 ## Dependencies
 

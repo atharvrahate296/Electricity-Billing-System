@@ -31,13 +31,11 @@ public class Signup extends JFrame implements ActionListener {
     private static final Font FIELD_FONT = new Font("Segoe UI", Font.PLAIN, 14);
     private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 14);
     
-    // Panel to hold dynamically changing fields
     private JPanel dynamicFieldsPanel;
     
-    // *** NEW/MODIFIED CONSTANTS FOR SIZE UNIFORMITY ***
     private static final int INPUT_WIDTH = 250; 
     private static final int INPUT_HEIGHT = 36;
-    private static final int FRAME_WIDTH = 850;
+    private static final int FRAME_WIDTH = 900;
     private static final int FRAME_HEIGHT = 650;
 
     public Signup() {
@@ -55,7 +53,6 @@ public class Signup extends JFrame implements ActionListener {
         leftPanel.setPreferredSize(new Dimension(FRAME_WIDTH / 3, FRAME_HEIGHT));
         
         try {
-            // *** ADDING IMAGE TO LEFT PANEL ***
             ImageIcon img = new ImageIcon("lib/icon/signup.png"); 
             Image scaled = img.getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
             JLabel image = new JLabel(new ImageIcon(scaled));
@@ -73,7 +70,6 @@ public class Signup extends JFrame implements ActionListener {
         centerWrapper.setBackground(FRAME_BG);
         add(centerWrapper, BorderLayout.CENTER);
         
-        // --- Main Form Panel ---
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(CARD_BG);
         formPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -81,7 +77,6 @@ public class Signup extends JFrame implements ActionListener {
             new EmptyBorder(30, 40, 30, 40)
         ));
         
-        // --- GridBag Constraints Setup ---
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(8, 0, 8, 0);
@@ -96,30 +91,24 @@ public class Signup extends JFrame implements ActionListener {
         gbc.insets = new Insets(0, 0, 20, 0);
         formPanel.add(title, gbc);
 
-        // Reset constraints for fields (Label on left, Field/Choice on right)
+        // Account Type Row
         gbc.gridwidth = 1; 
         gbc.insets = new Insets(5, 0, 5, 15);
-
-        // --- Row 1: Account Type Label ---
         gbc.gridy = 1;
         gbc.gridx = 0;
         JLabel heading = new JLabel("Account Type");
         heading.setFont(LABEL_FONT);
         heading.setForeground(TEXT_GRAY);
-        // *** ALIGNMENT: Left Align Label ***
         gbc.anchor = GridBagConstraints.WEST; 
         formPanel.add(heading, gbc);
 
-        // --- Row 1: Account Type Choice (Select Block) ---
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        // *** ALIGNMENT: Right Align Input ***
         gbc.anchor = GridBagConstraints.EAST; 
         accountType = new Choice();
         accountType.add("Customer");
         accountType.add("Admin");
         accountType.setFont(FIELD_FONT);
-        // *** SIZE FIX: Ensure Choice has uniform size ***
         accountType.setPreferredSize(new Dimension(INPUT_WIDTH, INPUT_HEIGHT));
         formPanel.add(accountType, gbc);
         gbc.weightx = 0;
@@ -132,9 +121,7 @@ public class Signup extends JFrame implements ActionListener {
         dgbc.fill = GridBagConstraints.HORIZONTAL;
         dgbc.insets = new Insets(5, 0, 5, 15);
         
-        // --- Setting up components and adding them to Dynamic Panel ---
-        
-        // --- Row 2: Meter/EMP Code ---
+        // Meter/EMP Code
         meterLabel = createLabel("Meter Number");
         empCodeLabel = createLabel("EMP Code");
         meter = roundedTextField();
@@ -150,7 +137,7 @@ public class Signup extends JFrame implements ActionListener {
         dynamicFieldsPanel.add(meter, dgbc);
         dynamicFieldsPanel.add(empCode, dgbc);
 
-        // --- Row 3: Username ---
+        // Username
         usernameLabel = createLabel("Username");
         username = roundedTextField();
         dgbc.gridy = 1;
@@ -161,7 +148,7 @@ public class Signup extends JFrame implements ActionListener {
         dgbc.anchor = GridBagConstraints.EAST;
         dynamicFieldsPanel.add(username, dgbc);
         
-        // --- Row 4: Name (Common) ---
+        // Name
         nameLabel = createLabel("Name");
         name = roundedTextField();
         dgbc.gridy = 2;
@@ -172,7 +159,7 @@ public class Signup extends JFrame implements ActionListener {
         dgbc.anchor = GridBagConstraints.EAST;
         dynamicFieldsPanel.add(name, dgbc);
         
-        // --- Row 5: Address/Number ---
+        // Address/Number
         addressLabel = createLabel("Address");
         numberLabel = createLabel("Number");
         address = roundedTextField();
@@ -188,7 +175,7 @@ public class Signup extends JFrame implements ActionListener {
         dynamicFieldsPanel.add(address, dgbc);
         dynamicFieldsPanel.add(number, dgbc);
 
-        // --- Row 6: RMN (Customer Only) ---
+        // RMN
         rmnLabel = createLabel("Mobile Number");
         rmn = roundedTextField();
         dgbc.gridy = 4;
@@ -199,7 +186,6 @@ public class Signup extends JFrame implements ActionListener {
         dgbc.anchor = GridBagConstraints.EAST;
         dynamicFieldsPanel.add(rmn, dgbc);
 
-        // --- Add Dynamic Panel to Form ---
         gbc.gridy = 2;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
@@ -208,12 +194,13 @@ public class Signup extends JFrame implements ActionListener {
         formPanel.add(dynamicFieldsPanel, gbc);
 
         // --- Common Password Fields ---
-        // Row 7: Password
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
         JLabel passwordLabel = createLabel("Password");
         password = roundedPasswordField();
         gbc.gridy = 3;
         gbc.gridx = 0;
-        gbc.gridwidth = 1;
         gbc.insets = new Insets(5, 0, 5, 15);
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(passwordLabel, gbc);
@@ -221,7 +208,6 @@ public class Signup extends JFrame implements ActionListener {
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(password, gbc);
 
-        // Row 8: Confirm Password
         JLabel confirmPasswordLabel = createLabel("Confirm Password");
         confirmPassword = roundedPasswordField();
         gbc.gridy = 4;
@@ -232,7 +218,7 @@ public class Signup extends JFrame implements ActionListener {
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(confirmPassword, gbc);
 
-        // --- Row 9: Buttons ---
+        // --- Buttons ---
         gbc.gridy = 5;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
@@ -247,13 +233,10 @@ public class Signup extends JFrame implements ActionListener {
         btnPanel.add(back);
         formPanel.add(btnPanel, gbc);
 
-        // --- Add Form to Center ---
         centerWrapper.add(formPanel, new GridBagConstraints());
 
-        // --- Initial Visibility Setup ---
         setupInitialVisibility();
 
-        // --- Listeners ---
         accountType.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -266,8 +249,6 @@ public class Signup extends JFrame implements ActionListener {
         setVisible(true);
     }
     
-    // ----------- Custom Components (Using fixed INPUT_WIDTH/HEIGHT) -----------
-
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(LABEL_FONT);
@@ -282,7 +263,6 @@ public class Signup extends JFrame implements ActionListener {
             new LineBorder(BORDER_GRAY, 1, true),
             new EmptyBorder(5, 10, 5, 10) 
         ));
-        // *** SIZE FIX ***
         f.setPreferredSize(new Dimension(INPUT_WIDTH, INPUT_HEIGHT)); 
         f.setFont(FIELD_FONT);
         f.setForeground(TEXT_GRAY);
@@ -295,7 +275,6 @@ public class Signup extends JFrame implements ActionListener {
             new LineBorder(BORDER_GRAY, 1, true),
             new EmptyBorder(5, 10, 5, 10) 
         ));
-        // *** SIZE FIX ***
         f.setPreferredSize(new Dimension(INPUT_WIDTH, INPUT_HEIGHT)); 
         f.setFont(FIELD_FONT);
         f.setForeground(TEXT_GRAY);
@@ -304,18 +283,15 @@ public class Signup extends JFrame implements ActionListener {
     
     private JButton roundedButton(String text, Color color) {
         JButton b = new JButton(text) {
-            private final int ARC = 18;
-
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(color);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), ARC, ARC);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
                 super.paintComponent(g);
                 g2.dispose();
             }
-            public void paintBorder(Graphics g) {
-            }
+            public void paintBorder(Graphics g) {}
         };
         b.setForeground(Color.WHITE);
         b.setContentAreaFilled(false);
@@ -325,52 +301,30 @@ public class Signup extends JFrame implements ActionListener {
         return b;
     }
 
-    // ----------- Visibility Logic (Optimized for GridBagLayout) -----------
     private void setupInitialVisibility() {
         updateVisibility("Customer"); 
     }
 
     private void updateVisibility(String user) {
-        // Hide all dynamically placed components first
-        meterLabel.setVisible(false);
-        meter.setVisible(false);
-        addressLabel.setVisible(false);
-        address.setVisible(false);
-        rmnLabel.setVisible(false);
-        rmn.setVisible(false);
-        empCodeLabel.setVisible(false);
-        empCode.setVisible(false);
-        numberLabel.setVisible(false);
-        number.setVisible(false);
-        usernameLabel.setVisible(true);
-        username.setVisible(true);
-        nameLabel.setVisible(true);
-        name.setVisible(true);
-
+        meterLabel.setVisible(false); meter.setVisible(false);
+        addressLabel.setVisible(false); address.setVisible(false);
+        rmnLabel.setVisible(false); rmn.setVisible(false);
+        empCodeLabel.setVisible(false); empCode.setVisible(false);
+        numberLabel.setVisible(false); number.setVisible(false);
+        
         if (user.equals("Customer")) {
-            meterLabel.setVisible(true);
-            meter.setVisible(true);
-            addressLabel.setVisible(true);
-            address.setVisible(true);
-            rmnLabel.setVisible(true);
-            rmn.setVisible(true);
-            
-        } else { // Admin
-            empCodeLabel.setVisible(true);
-            empCode.setVisible(true);
-            numberLabel.setVisible(true);
-            number.setVisible(true);
+            meterLabel.setVisible(true); meter.setVisible(true);
+            addressLabel.setVisible(true); address.setVisible(true);
+            rmnLabel.setVisible(true); rmn.setVisible(true);
+        } else { 
+            empCodeLabel.setVisible(true); empCode.setVisible(true);
+            numberLabel.setVisible(true); number.setVisible(true);
         }
         
-        // Ensure the layout repaints
         dynamicFieldsPanel.revalidate();
         dynamicFieldsPanel.repaint();
-        revalidate();
-        repaint();
     }
 
-
-    // ----------- Functional Logic (Unchanged) -----------
     @Override
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == create) {
@@ -383,8 +337,10 @@ public class Signup extends JFrame implements ActionListener {
                 return;
             }
 
+            // --- PASSWORD HASHING LOGIC ---
+            String hashedPw = PasswordHasher.hash(spassword);
+
             try (Connection c = Database.getConnection()) {
-                
                 if (atype.equals("Admin")) {
                     String empCodeVal = empCode.getText();
                     String usernameVal = username.getText();
@@ -396,15 +352,14 @@ public class Signup extends JFrame implements ActionListener {
                         return;
                     }
 
-                    String adminId = generateAdminId();
                     String query = "INSERT INTO admin (EMP_Code, username, name, number, password, admin_id) VALUES(?, ?, ?, ?, ?, ?)";
                     try (PreparedStatement ps = c.prepareStatement(query)) {
                         ps.setString(1, empCodeVal);
                         ps.setString(2, usernameVal);
                         ps.setString(3, nameVal);
                         ps.setString(4, numberVal);
-                        ps.setString(5, spassword);
-                        ps.setString(6, adminId);
+                        ps.setString(5, hashedPw); // Store the hash
+                        ps.setString(6, generateAdminId());
                         ps.executeUpdate();
                     }
                 } else {
@@ -426,7 +381,7 @@ public class Signup extends JFrame implements ActionListener {
                         ps.setString(3, nameVal);
                         ps.setString(4, addressVal);
                         ps.setString(5, rmnVal);
-                        ps.setString(6, spassword);
+                        ps.setString(6, hashedPw); // Store the hash
                         ps.executeUpdate();
                     }
                 }
@@ -453,6 +408,4 @@ public class Signup extends JFrame implements ActionListener {
         }
         return sb.toString();
     }
-
-    
 }

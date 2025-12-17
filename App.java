@@ -23,7 +23,7 @@ public class App extends JFrame implements ActionListener {
         this.meter_pass = meter_pass;
 
         setTitle("Electricity Billing System - " + atype);
-        setSize(750, 480);
+        setSize(800, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());

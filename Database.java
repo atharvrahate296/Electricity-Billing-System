@@ -37,7 +37,7 @@ public class Database {
 
             // Attempt connection
             newConnection = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Connected to MySQL Database Server!");
+            // System.out.println("Connected to MySQL Database Server!");
             createTables(newConnection);
         } catch (Exception e) {
             System.err.println("Unexpected error while initializing database connection: " + e.getMessage());
@@ -84,10 +84,7 @@ public class Database {
                     "status VARCHAR(255) DEFAULT 'Pending'," +
                     "FOREIGN KEY (meter_id) REFERENCES user(meter_id) ON DELETE CASCADE" +
                     ")");
-            // System.out.println("Admin table created/verified");
-            // System.out.println("User table created/verified");
-            // System.out.println("Bill table created/verified");
-            System.out.println("All Tables created/verified");
+            System.out.println("\t***WELCOME TO ELECTRICITY BILLING SYSTEM***\nDatabase initialized! All Tables created/verified!!");
             
         } catch (Exception e) {
             System.err.println("Error creating tables: " + e.getMessage());

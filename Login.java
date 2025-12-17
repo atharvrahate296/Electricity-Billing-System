@@ -24,9 +24,8 @@ public class Login extends JFrame implements ActionListener {
     private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 14);
 
     public Login() {
-
         super("Login Page");
-        setSize(750, 480);
+        setSize(850, 520);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(FRAME_BG);
@@ -35,7 +34,6 @@ public class Login extends JFrame implements ActionListener {
         // LEFT IMAGE
         JPanel left = new JPanel(new GridBagLayout());
         left.setBackground(FRAME_BG);
-
         try {
             ImageIcon img = new ImageIcon("lib/icon/login.png");
             Image scaled = img.getImage().getScaledInstance(280, 280, Image.SCALE_SMOOTH);
@@ -103,7 +101,6 @@ public class Login extends JFrame implements ActionListener {
         forgotPasswordButton.setContentAreaFilled(false);
         forgotPasswordButton.setFocusPainted(false);
         forgotPasswordButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         forgotPasswordButton.setPreferredSize(new Dimension(280, 22));
         forgotPasswordButton.setHorizontalAlignment(SwingConstants.LEFT);
         forgotPasswordButton.addActionListener(e -> {
@@ -112,11 +109,8 @@ public class Login extends JFrame implements ActionListener {
         });
         card.add(forgotPasswordButton, gbc);
 
-        // ✅ RESET constraints
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.weightx = 0;
-
         gbc.gridy++;
         JLabel role = new JLabel("Login as");
         role.setFont(LABEL_FONT);
@@ -126,8 +120,8 @@ public class Login extends JFrame implements ActionListener {
         logginin = new Choice();
         logginin.add("Admin");
         logginin.add("Customer");
-        logginin.setFont(LABEL_FONT); // same as before
-        logginin.setPreferredSize(new Dimension(280, 30)); // original height
+        logginin.setFont(LABEL_FONT);
+        logginin.setPreferredSize(new Dimension(280, 30));
         card.add(logginin, gbc);
 
         gbc.gridy++;
@@ -153,9 +147,7 @@ public class Login extends JFrame implements ActionListener {
 
     private JTextField roundedTextField() {
         JTextField f = new JTextField();
-        f.setBorder(new CompoundBorder(
-                new LineBorder(BORDER_GRAY, 1, true),
-                new EmptyBorder(5, 10, 5, 10)));
+        f.setBorder(new CompoundBorder(new LineBorder(BORDER_GRAY, 1, true), new EmptyBorder(5, 10, 5, 10)));
         f.setPreferredSize(new Dimension(280, 36));
         f.setFont(LABEL_FONT);
         return f;
@@ -163,9 +155,7 @@ public class Login extends JFrame implements ActionListener {
 
     private JPasswordField roundedPasswordField() {
         JPasswordField f = new JPasswordField();
-        f.setBorder(new CompoundBorder(
-                new LineBorder(BORDER_GRAY, 1, true),
-                new EmptyBorder(5, 10, 5, 10)));
+        f.setBorder(new CompoundBorder(new LineBorder(BORDER_GRAY, 1, true), new EmptyBorder(5, 10, 5, 10)));
         f.setPreferredSize(new Dimension(280, 36));
         f.setFont(LABEL_FONT);
         return f;
@@ -181,9 +171,7 @@ public class Login extends JFrame implements ActionListener {
                 super.paintComponent(g);
                 g2.dispose();
             }
-
-            public void paintBorder(Graphics g) {
-            }
+            public void paintBorder(Graphics g) {}
         };
         b.setFont(BUTTON_FONT);
         b.setForeground(Color.WHITE);
@@ -197,43 +185,48 @@ public class Login extends JFrame implements ActionListener {
         if (ae.getSource() == login) {
             String susername = username.getText();
             String spassword = String.valueOf(password.getPassword());
-            String user = logginin.getSelectedItem();
+            String userRole = logginin.getSelectedItem();
 
             try (Connection c = Database.getConnection()) {
-                String query = null;
-                if ("Admin".equals(user)) {
-                    query = "select * from admin where username = ? and password = ?";
-                } else {
-                    query = "select * from user where username = ? and password = ?";
-                }
+                // Fetch the user data including the HASHED password using only username
+                String query = "Admin".equals(userRole) 
+                    ? "select * from admin where username = ?" 
+                    : "select * from user where username = ?";
 
                 try (PreparedStatement ps = c.prepareStatement(query)) {
                     ps.setString(1, susername);
-                    ps.setString(2, spassword);
+                    
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
-                            String userType = "Admin".equals(user) ? "Admin" : "Customer";
-                            String meter = "Admin".equals(user) ? susername : rs.getString("meter_id");
+                            // Retrieve the hashed password from the database
+                            String storedHash = rs.getString("password");
 
-                            setVisible(false);
-                            new App(userType, meter).setVisible(true);
+                            // --- BCrypt Verification Logic ---
+                            if (PasswordHasher.check(spassword, storedHash)) {
+                                // Match found
+                                String type = "Admin".equals(userRole) ? "Admin" : "Customer";
+                                String meter = "Admin".equals(userRole) ? susername : rs.getString("meter_id");
+
+                                setVisible(false);
+                                new App(type, meter).setVisible(true);
+                            } else {
+                                // Password mismatch
+                                JOptionPane.showMessageDialog(null, "Invalid Password");
+                                password.setText("");
+                            }
                         } else {
-                            JOptionPane.showMessageDialog(null, "Invalid Login");
-                            username.setText("");
-                            password.setText("");
+                            // User not found
+                            JOptionPane.showMessageDialog(null, "Username not found");
                         }
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage());
             }
         } else if (ae.getSource() == signup) {
             setVisible(false);
             new Signup().setVisible(true);
         }
     }
-
-    // public static void main(String[] args) {
-    //     new Login();
-    // }
 }
