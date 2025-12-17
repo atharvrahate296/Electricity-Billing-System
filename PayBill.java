@@ -9,12 +9,16 @@ public class PayBill extends JFrame implements ActionListener {
 
     // UI Components
     JLabel meternumberLabel, nameLabel;
-    JButton pay, back;
+    JButton pay, back, downloadReceipt;
     JTable billTable;
     DefaultTableModel tableModel;
     JLabel noBillMessage;
 
     String meter;
+    // Store last paid bill details for receipt generation
+    private int lastPaidBillId = -1;
+    private String lastPaidMonth = "";
+    private String lastPaidYear = "";
 
     // THEME
     private static final Color FRAME_BG  = new Color(245, 247, 250);
@@ -77,12 +81,11 @@ public class PayBill extends JFrame implements ActionListener {
         gbcLeft.gridy = 0;
 
         meternumberLabel = valueLabel();
-        nameLabel        = valueLabel();
+        nameLabel         = valueLabel();
 
         addRow(leftPanel, gbcLeft, "Meter Number", meternumberLabel);
-        addRow(leftPanel, gbcLeft, "Name",          nameLabel);
+        addRow(leftPanel, gbcLeft, "Name",           nameLabel);
 
-        // Message label for when no pending bills
         gbcLeft.gridx = 0;
         gbcLeft.gridwidth = 2;
         gbcLeft.gridy++;
@@ -98,7 +101,7 @@ public class PayBill extends JFrame implements ActionListener {
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // make table read-only
+                return false; 
             }
         };
 
@@ -129,11 +132,15 @@ public class PayBill extends JFrame implements ActionListener {
 
         back = createButton("Back", MUTED);
         pay  = createButton("Pay Now", SUCCESS);
+        downloadReceipt = createButton("Download Receipt", PRIMARY);
+        downloadReceipt.setEnabled(false);
 
         back.addActionListener(this);
         pay.addActionListener(this);
+        downloadReceipt.addActionListener(this);
 
         buttons.add(back);
+        buttons.add(downloadReceipt);
         buttons.add(pay);
 
         JPanel bottom = new JPanel(new BorderLayout());
@@ -147,65 +154,38 @@ public class PayBill extends JFrame implements ActionListener {
         center.add(card);
         add(center, BorderLayout.CENTER);
 
-        // ------------ LOAD USER DATA -------------
         loadUserDetails();
-
-        // ------------ LOAD PENDING BILLS -------------
         loadBill();
 
         setVisible(true);
     }
 
-    // ================= DATA LOADING =================
-
     private void loadUserDetails() {
         try (Connection c = Database.getConnection()) {
-            if (c == null) throw new Exception("Database connection is null.");
-
-            try (PreparedStatement ps = c.prepareStatement(
-                    "SELECT name FROM user WHERE meter_id = ?")) {
-
-                ps.setInt(1, Integer.parseInt(meter));
-
+            try (PreparedStatement ps = c.prepareStatement("SELECT name FROM user WHERE meter_id = ?")) {
+                ps.setString(1, meter);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         meternumberLabel.setText(meter);
                         nameLabel.setText(rs.getString("name"));
-                    } else {
-                        meternumberLabel.setText(meter);
-                        nameLabel.setText("User Not Found");
                     }
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            meternumberLabel.setText(meter);
-            nameLabel.setText("Error loading user");
         }
     }
 
-    // public so inner dialog can refresh
     public void loadBill() {
         tableModel.setRowCount(0);
         noBillMessage.setText("");
         pay.setEnabled(false);
-
         boolean foundBills = false;
 
         try (Connection c = Database.getConnection()) {
-            if (c == null) throw new Exception("Database connection is null.");
-
-            // keeping your original query logic (only Pending)
-            String sql = "SELECT month, year, units, amount, status " +
-                         "FROM bill " +
-                         "WHERE meter_id = ? AND status = 'Pending' " +
-                         "ORDER BY year DESC, " +
-                         "FIELD(month, 'January', 'February', 'March', 'April', 'May', 'June', " +
-                         "'July', 'August', 'September', 'October', 'November', 'December') DESC";
-
+            String sql = "SELECT month, year, units, amount, status FROM bill WHERE meter_id = ? AND status = 'Pending'";
             try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setInt(1, Integer.parseInt(meter));
-
+                ps.setString(1, meter);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         foundBills = true;
@@ -221,64 +201,117 @@ public class PayBill extends JFrame implements ActionListener {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "Error loading bills: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
         }
 
         if (!foundBills) {
-            noBillMessage.setText("There are no electricity bills due\n for your meter ID as of now.");
+            noBillMessage.setText("No pending bills found.");
         } else {
             pay.setEnabled(true);
         }
     }
 
-    // ================= ACTION HANDLING =================
-
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == back) {
             setVisible(false);
+        } else if (e.getSource() == downloadReceipt) {
+            downloadReceiptAction();
         } else if (e.getSource() == pay) {
             int selectedRow = billTable.getSelectedRow();
             if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(this,
-                        "Please select a bill from the table to pay.",
-                        "No Bill Selected",
-                        JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Select a bill to pay.");
                 return;
             }
-
-            String month  = tableModel.getValueAt(selectedRow, 0).toString();
-            String year   = tableModel.getValueAt(selectedRow, 1).toString();
-            String units  = tableModel.getValueAt(selectedRow, 2).toString();
-            String amount = tableModel.getValueAt(selectedRow, 3).toString();
 
             new PaymentScreen(
                     this,
                     meter,
                     nameLabel.getText(),
-                    month,
-                    year,
-                    units,
-                    amount
+                    tableModel.getValueAt(selectedRow, 0).toString(),
+                    tableModel.getValueAt(selectedRow, 1).toString(),
+                    tableModel.getValueAt(selectedRow, 2).toString(),
+                    tableModel.getValueAt(selectedRow, 3).toString()
             );
         }
     }
 
-    // ================= HELPERS =================
+    private void downloadReceiptAction() {
+        if (lastPaidBillId == -1) {
+            JOptionPane.showMessageDialog(this, "No paid bill available. Please pay a bill first.");
+            return;
+        }
 
-    private static void addLabel(JPanel p, GridBagConstraints gbc, String text) {
-        gbc.gridx = 0;
-        JLabel l = new JLabel(text);
-        l.setFont(LABEL);
-        l.setForeground(TEXT);
-        p.add(l, gbc);
+        try (Connection c = Database.getConnection()) {
+            // Fetch bill details
+            String billQuery = "SELECT b.bill_id, u.meter_id, u.name, u.address, u.rmn, b.month, b.year, b.units, b.amount FROM bill b JOIN user u ON b.meter_id = u.meter_id WHERE b.bill_id = ?";
+            try (PreparedStatement ps = c.prepareStatement(billQuery)) {
+                ps.setInt(1, lastPaidBillId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        BillReceipt receipt = new BillReceipt(
+                                rs.getInt("bill_id"),
+                                rs.getInt("meter_id"),
+                                rs.getString("name"),
+                                rs.getString("address"),
+                                rs.getString("rmn"),
+                                rs.getString("month"),
+                                rs.getString("year"),
+                                rs.getInt("units"),
+                                rs.getDouble("amount")
+                        );
+
+                        // Create file chooser
+                        JFileChooser fileChooser = new JFileChooser();
+                        fileChooser.setDialogTitle("Save Receipt As");
+                        fileChooser.setSelectedFile(new java.io.File("Receipt_" + receipt.getTransactionId() + ".txt"));
+                        
+                        // Add file filters
+                        javax.swing.filechooser.FileNameExtensionFilter txtFilter = 
+                            new javax.swing.filechooser.FileNameExtensionFilter("Text Files (*.txt)", "txt");
+                        javax.swing.filechooser.FileNameExtensionFilter csvFilter = 
+                            new javax.swing.filechooser.FileNameExtensionFilter("CSV Files (*.csv)", "csv");
+                        
+                        fileChooser.addChoosableFileFilter(txtFilter);
+                        fileChooser.addChoosableFileFilter(csvFilter);
+                        fileChooser.setFileFilter(txtFilter);
+
+                        int userSelection = fileChooser.showSaveDialog(this);
+
+                        if (userSelection == JFileChooser.APPROVE_OPTION) {
+                            java.io.File fileToSave = fileChooser.getSelectedFile();
+                            
+                            boolean success = false;
+                            if (fileChooser.getFileFilter() == csvFilter) {
+                                success = receipt.exportAsCSV(fileToSave);
+                            } else {
+                                success = receipt.exportToFile(fileToSave);
+                            }
+
+                            if (success) {
+                                JOptionPane.showMessageDialog(this, 
+                                    "Receipt downloaded successfully!\nFile saved: " + fileToSave.getAbsolutePath());
+                            } else {
+                                JOptionPane.showMessageDialog(this, 
+                                    "Error saving receipt. Please try again.", 
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, 
+                "Error fetching bill details: " + ex.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 
     private static void addRow(JPanel p, GridBagConstraints gbc, String text, JLabel value) {
-        addLabel(p, gbc, text);
+        gbc.gridx = 0;
+        JLabel l = new JLabel(text);
+        l.setFont(LABEL);
+        p.add(l, gbc);
         gbc.gridx = 1;
         p.add(value, gbc);
         gbc.gridy++;
@@ -296,33 +329,21 @@ public class PayBill extends JFrame implements ActionListener {
 
     private static JButton createButton(String text, Color bg) {
         JButton b = new JButton(text) {
-            @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                        RenderingHints.VALUE_ANTIALIAS_ON);
-
-                // background
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(bg);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-
                 super.paintComponent(g);
                 g2.dispose();
             }
-
-            @Override
-            protected void paintBorder(Graphics g) {
-                // no border (clean look)
-            }
+            protected void paintBorder(Graphics g) {}
         };
-
         b.setFont(new Font("Segoe UI", Font.BOLD, 13));
         b.setForeground(Color.WHITE);
         b.setContentAreaFilled(false);
         b.setFocusPainted(false);
-        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
         b.setBorder(new EmptyBorder(10, 26, 10, 26));
-
         return b;
     }
 
@@ -330,96 +351,50 @@ public class PayBill extends JFrame implements ActionListener {
 
     class PaymentScreen extends JDialog implements ActionListener {
 
-        JTextField passwordField;
+        JPasswordField passwordField;
         JButton confirmPay;
+        String meterId, userName, month, year, units, amount;
 
-        String meterId;
-        String userName;
-        String month;
-        String year;
-        String units;
-        String amount;
-
-        PaymentScreen(Frame owner,
-                      String meterId,
-                      String userName,
-                      String month,
-                      String year,
-                      String units,
-                      String amount) {
-
+        PaymentScreen(Frame owner, String meterId, String userName, String month, String year, String units, String amount) {
             super(owner, "Confirm Payment", true);
-            this.meterId  = meterId;
-            this.userName = userName;
-            this.month    = month;
-            this.year     = year;
-            this.units    = units;
-            this.amount   = amount;
+            this.meterId = meterId; this.userName = userName;
+            this.month = month; this.year = year;
+            this.units = units; this.amount = amount;
 
             setSize(450, 500);
             setLocationRelativeTo(owner);
             setLayout(new BorderLayout());
             getContentPane().setBackground(FRAME_BG);
 
-            // Header
-            JPanel header = new JPanel(new BorderLayout());
-            header.setBackground(HEADER_BG);
-            header.setBorder(new EmptyBorder(10, 15, 10, 15));
-
-            JLabel title = new JLabel("Confirm Bill Payment");
-            title.setForeground(Color.WHITE);
-            title.setFont(TITLE);
-            header.add(title, BorderLayout.WEST);
-
-            add(header, BorderLayout.NORTH);
-
-            // Form
             JPanel form = new JPanel(new GridBagLayout());
             form.setOpaque(false);
             form.setBorder(new EmptyBorder(20, 20, 20, 20));
-
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.insets = new Insets(8, 8, 8, 8);
-            gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.HORIZONTAL;
             gbc.weightx = 1;
-            gbc.gridx = 0;
-            gbc.gridy = 0;
 
             addRow(form, gbc, "Meter Number", createValueLabel(meterId));
-            addRow(form, gbc, "Name",         createValueLabel(userName));
-            addRow(form, gbc, "Month",        createValueLabel(month));
-            addRow(form, gbc, "Year",         createValueLabel(year));
-            addRow(form, gbc, "Units",        createValueLabel(units));
-            addRow(form, gbc, "Amount",       createValueLabel(amount));
+            addRow(form, gbc, "Name", createValueLabel(userName));
+            addRow(form, gbc, "Month", createValueLabel(month));
+            addRow(form, gbc, "Year", createValueLabel(year));
+            addRow(form, gbc, "Amount", createValueLabel(amount));
 
-            // Password field
-            JLabel passLabel = new JLabel("Enter Password");
-            passLabel.setFont(LABEL);
-            passLabel.setForeground(TEXT);
-            gbc.gridx = 0;
-            gbc.gridy++;
-            form.add(passLabel, gbc);
+            gbc.gridx = 0; gbc.gridy++;
+            JLabel passL = new JLabel("Enter Password"); passL.setFont(LABEL);
+            form.add(passL, gbc);
 
             passwordField = new JPasswordField();
             passwordField.setFont(FIELD);
-            passwordField.setBorder(new LineBorder(BORDER));
             gbc.gridx = 1;
             form.add(passwordField, gbc);
 
             add(form, BorderLayout.CENTER);
 
-            // Buttons
-            JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-            bottom.setOpaque(false);
+            JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             confirmPay = createButton("Pay", SUCCESS);
             confirmPay.addActionListener(this);
             bottom.add(confirmPay);
-
-            JButton cancel = createButton("Cancel", MUTED);
-            cancel.addActionListener(e -> dispose());
-            bottom.add(cancel);
-
             add(bottom, BorderLayout.SOUTH);
 
             setVisible(true);
@@ -436,69 +411,62 @@ public class PayBill extends JFrame implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            String enteredPassword = passwordField.getText().trim();
+            String enteredPassword = new String(passwordField.getPassword());
 
             if (enteredPassword.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter your password.",
-                        "Password Required",
-                        JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Enter password.");
                 return;
             }
 
             try (Connection c = Database.getConnection()) {
-                if (c == null) throw new Exception("Database connection is null.");
-
-                // 1. Verify password
+                // Fetch the hashed password from database
                 String userQuery = "SELECT password FROM user WHERE meter_id = ?";
                 try (PreparedStatement ps = c.prepareStatement(userQuery)) {
-                    ps.setInt(1, Integer.parseInt(meterId));
+                    ps.setString(1, meterId);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
-                            String correctPass = rs.getString("password");
-                            if (!enteredPassword.equals(correctPass)) {
-                                JOptionPane.showMessageDialog(this,
-                                        "Incorrect password.",
-                                        "Authentication Failed",
-                                        JOptionPane.ERROR_MESSAGE);
-                                return;
+                            String storedHash = rs.getString("password");
+
+                            // --- SECURE VERIFICATION USING BCRYPT ---
+                            if (PasswordHasher.check(enteredPassword, storedHash)) {
+                                // Update bill
+                                String updateSql = "UPDATE bill SET status = 'Paid' WHERE meter_id = ? AND month = ? AND year = ?";
+                                try (PreparedStatement psUpdate = c.prepareStatement(updateSql)) {
+                                    psUpdate.setString(1, meterId);
+                                    psUpdate.setString(2, month);
+                                    psUpdate.setString(3, year);
+                                    psUpdate.executeUpdate();
+                                }
+                                
+                                // Store payment details for receipt generation
+                                PayBill.this.lastPaidMonth = month;
+                                PayBill.this.lastPaidYear = year;
+                                
+                                // Get bill ID for receipt
+                                String billQuery = "SELECT bill_id FROM bill WHERE meter_id = ? AND month = ? AND year = ?";
+                                try (PreparedStatement psBillId = c.prepareStatement(billQuery)) {
+                                    psBillId.setString(1, meterId);
+                                    psBillId.setString(2, month);
+                                    psBillId.setString(3, year);
+                                    try (ResultSet rsBillId = psBillId.executeQuery()) {
+                                        if (rsBillId.next()) {
+                                            PayBill.this.lastPaidBillId = rsBillId.getInt("bill_id");
+                                        }
+                                    }
+                                }
+                                
+                                JOptionPane.showMessageDialog(this, "Payment Successful!\nYou can now download the receipt.");
+                                PayBill.this.loadBill();
+                                PayBill.this.downloadReceipt.setEnabled(true);
+                                dispose();
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Incorrect password.");
                             }
-                        } else {
-                            JOptionPane.showMessageDialog(this,
-                                    "User not found.",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE);
-                            return;
                         }
                     }
                 }
-
-                // 2. Update bill status to Paid
-                String updateSql = "UPDATE bill SET status = 'Paid' " +
-                                   "WHERE meter_id = ? AND month = ? AND year = ?";
-                try (PreparedStatement psUpdate = c.prepareStatement(updateSql)) {
-                    psUpdate.setInt(1, Integer.parseInt(meterId));
-                    psUpdate.setString(2, month);
-                    psUpdate.setString(3, year);
-                    psUpdate.executeUpdate();
-                }
-
-                JOptionPane.showMessageDialog(this,
-                        "Bill Paid Successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
-
-                // refresh parent table
-                PayBill.this.loadBill();
-
-                dispose();
-
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this,
-                        "Error paying bill: " + ex.getMessage(),
-                        "Payment Error",
-                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }

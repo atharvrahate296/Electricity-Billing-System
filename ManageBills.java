@@ -7,7 +7,7 @@ import javax.swing.table.*;
     public class ManageBills extends JFrame implements ActionListener {
 
     JTable table;
-    JButton save, back, exit, refresh, delete;
+    JButton save, back, exit, refresh, delete, downloadReceipt;
     JComboBox<String> statusComboBox;
     private DefaultTableModel model;
 
@@ -113,12 +113,14 @@ import javax.swing.table.*;
         save    = new FlatRoundedButton("Save", PRIMARY);
         refresh = new FlatRoundedButton("Refresh", SUCCESS);
         delete  = new FlatRoundedButton("Delete", DANGER);
+        downloadReceipt = new FlatRoundedButton("Download Receipt", PRIMARY);
         back    = new FlatRoundedButton("Back", MUTED);
         exit    = new FlatRoundedButton("Exit", MUTED);
 
         right.add(save);
         right.add(refresh);
         right.add(delete);
+        right.add(downloadReceipt);
         right.add(back);
         right.add(exit);
 
@@ -130,6 +132,7 @@ import javax.swing.table.*;
         save.addActionListener(this);
         refresh.addActionListener(this);
         delete.addActionListener(this);
+        downloadReceipt.addActionListener(this);
         back.addActionListener(this);
         exit.addActionListener(this);
 
@@ -224,11 +227,93 @@ import javax.swing.table.*;
             }
         }
 
+        if (ae.getSource() == downloadReceipt) {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                downloadReceiptAction();
+            } else {
+                JOptionPane.showMessageDialog(this, "Select a bill first");
+            }
+        }
+
         if (ae.getSource() == back || ae.getSource() == exit) {
             setVisible(false);
         }
     }
 
+    private void downloadReceiptAction() {
+        int row = table.getSelectedRow();
+        if (row < 0) return;
+
+        try (java.sql.Connection c = Database.getConnection()) {
+            if (c == null) throw new Exception("Database connection is null.");
+
+            int billId = (int) table.getValueAt(row, 0);
+
+            // Fetch bill details
+            String billQuery = "SELECT b.bill_id, u.meter_id, u.name, u.address, u.rmn, b.month, b.year, b.units, b.amount FROM bill b JOIN user u ON b.meter_id = u.meter_id WHERE b.bill_id = ?";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(billQuery)) {
+                ps.setInt(1, billId);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        BillReceipt receipt = new BillReceipt(
+                                rs.getInt("bill_id"),
+                                rs.getInt("meter_id"),
+                                rs.getString("name"),
+                                rs.getString("address"),
+                                rs.getString("rmn"),
+                                rs.getString("month"),
+                                rs.getString("year"),
+                                rs.getInt("units"),
+                                rs.getDouble("amount")
+                        );
+
+                        // Create file chooser
+                        JFileChooser fileChooser = new JFileChooser();
+                        fileChooser.setDialogTitle("Save Receipt As");
+                        fileChooser.setSelectedFile(new java.io.File("Receipt_" + receipt.getTransactionId() + ".txt"));
+                        
+                        // Add file filters
+                        javax.swing.filechooser.FileNameExtensionFilter txtFilter = 
+                            new javax.swing.filechooser.FileNameExtensionFilter("Text Files (*.txt)", "txt");
+                        javax.swing.filechooser.FileNameExtensionFilter csvFilter = 
+                            new javax.swing.filechooser.FileNameExtensionFilter("CSV Files (*.csv)", "csv");
+                        
+                        fileChooser.addChoosableFileFilter(txtFilter);
+                        fileChooser.addChoosableFileFilter(csvFilter);
+                        fileChooser.setFileFilter(txtFilter);
+
+                        int userSelection = fileChooser.showSaveDialog(this);
+
+                        if (userSelection == JFileChooser.APPROVE_OPTION) {
+                            java.io.File fileToSave = fileChooser.getSelectedFile();
+                            
+                            boolean success = false;
+                            if (fileChooser.getFileFilter() == csvFilter) {
+                                success = receipt.exportAsCSV(fileToSave);
+                            } else {
+                                success = receipt.exportToFile(fileToSave);
+                            }
+
+                            if (success) {
+                                JOptionPane.showMessageDialog(this, 
+                                    "Receipt downloaded successfully!\nFile saved: " + fileToSave.getAbsolutePath());
+                            } else {
+                                JOptionPane.showMessageDialog(this, 
+                                    "Error saving receipt. Please try again.", 
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Could not fetch bill details.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     // ================= BUTTON CLASS =================
     class FlatRoundedButton extends JButton {

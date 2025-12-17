@@ -23,7 +23,6 @@ public class ForgotPassword extends JFrame implements ActionListener {
     private static final Font FIELD_FONT = new Font("Segoe UI", Font.PLAIN, 14);
 
     public ForgotPassword() {
-
         setTitle("Reset Password");
         setSize(460, 450);
         setLocationRelativeTo(null);
@@ -93,9 +92,7 @@ public class ForgotPassword extends JFrame implements ActionListener {
 
     // ================= ACTIONS =================
     public void actionPerformed(ActionEvent e) {
-
         if (e.getSource() == reset) {
-
             String user = username.getText().trim();
             String p1 = new String(newPass.getPassword());
             String p2 = new String(confirmPass.getPassword());
@@ -110,11 +107,16 @@ public class ForgotPassword extends JFrame implements ActionListener {
                 return;
             }
 
+            // --- SECURITY STEP: HASH THE NEW PASSWORD ---
+            String hashedPw = PasswordHasher.hash(p1);
+
             try (Connection con = Database.getConnection()) {
-                try (PreparedStatement ps = con.prepareStatement(
-                        "UPDATE user SET password = ? WHERE username = ?"
-                )) {
-                    ps.setString(1, p1);
+                // Note: This updates the 'user' table. If updating admin, 
+                // you would need similar logic for the 'admin' table.
+                String query = "UPDATE user SET password = ? WHERE username = ?";
+                
+                try (PreparedStatement ps = con.prepareStatement(query)) {
+                    ps.setString(1, hashedPw); // Store the Hash, not plain text
                     ps.setString(2, user);
 
                     int updated = ps.executeUpdate();
@@ -122,17 +124,20 @@ public class ForgotPassword extends JFrame implements ActionListener {
                     if (updated > 0) {
                         JOptionPane.showMessageDialog(this, "Password updated successfully");
                         dispose();
+                        new Login().setVisible(true);
                     } else {
-                        JOptionPane.showMessageDialog(this, "User not found");
+                        JOptionPane.showMessageDialog(this, "User not found in Customer records");
                     }
                 }
             } catch (Exception ex) {
+                ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             }
         }
 
         if (e.getSource() == back) {
             dispose();
+            new Login().setVisible(true);
         }
     }
 

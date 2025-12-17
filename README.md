@@ -12,6 +12,7 @@ The system connects to a MySQL database to handle all data storage and retrieval
 - **Customer Management:** Administrators can add, update, and view detailed customer information.
 - **Bill Calculation & Management:** Automated calculation of electricity bills based on monthly consumption. Administrators can view, manage, and export bills.
 - **Payment Processing:** Customers can conveniently pay their bills through the application and view their payment history.
+- **Receipt Download:** Customers and admins can download professional bill payment receipts in TXT or CSV format with unique transaction IDs.
 - **Profile Management:** Users can view and update their profile information.
 - **Database Integration:** All application data is stored and managed in a MySQL database. The application automatically creates the necessary tables on its first run if they don't exist.
 
@@ -21,30 +22,64 @@ The project follows a simple, flat structure, making it easy to navigate and und
 
 ```
 .
-├── .env                  # Environment variables for database connection (DB_URL, DB_USER, DB_PASSWORD)
-├── .gitignore            # Specifies intentionally untracked files to ignore
-├── Bill.java             # Represents the Bill entity and its associated logic
-├── BillDetails.java      # Swing-based UI for viewing detailed bill information
-├── CalculateBill.java    # Handles the logic for calculating electricity bills
-├── Customer.java         # Represents the Customer entity and their data
+├── .env                  # Environment variables for database connection
+├── .gitignore            # Git ignore file
+├── App.java              # Main entry point of the application
+├── Bill.java             # Bill entity and logic
+├── BillDetails.java      # UI for viewing detailed bill information
+├── BillReceipt.java      # Receipt generation and export (NEW)
+├── Customer.java         # Customer entity and data
 ├── CustomerDetails.java  # UI for displaying customer details
-├── Database.java         # Manages the connection to the MySQL database and table creation
-├── ElectricityBoard.java # The main dashboard or admin panel for administrators
-├── ExportBills.java      # Contains functionality for exporting bill data
-├── Login.java            # UI and logic for user authentication
-├── App.java              # The main entry point of the application
-├── ManageBills.java      # UI for managing bills
-├── PayBill.java          # UI and logic for processing bill payments
+├── Database.java         # Database connection and table management
+├── ExportBills.java      # Bill data export functionality
+├── ForgotPassword.java   # Password recovery functionality
+├── GenerateBill.java     # Bill generation logic
+├── Login.java            # User authentication UI
+├── ManageBills.java      # UI for managing bills (enhanced with receipt download)
+├── PasswordHasher.java   # Secure password hashing using bcrypt
+├── PayBill.java          # Bill payment processing (enhanced with receipt download)
 ├── Profile.java          # User profile management UI
-├── Signup.java           # UI and logic for new user registration
-├── UpdateInformation.java# Logic to handle updates to user information
-├── ViewInformation.java  # UI for viewing user information
-├── icon/                 # Contains all the icons and images used in the application
-├── lib/                  # Contains the external libraries (JAR files) required for the project, such as the MySQL JDBC driver and dotenv for Java
-├── .vscode/              # Contains VS Code-specific settings, including launch configurations
+├── Signup.java           # New user registration UI
+├── UpdateInformation.java# User information update logic
+├── ViewInformation.java  # User information viewing UI
+├── icon/                 # Icons and images used in the application
+├── lib/                  # External libraries (MySQL JDBC driver, dotenv)
+├── target/               # Compiled class files
 ├── README.md             # This file
-└── SETUP_GUIDE.md        # Provides additional setup instructions
+├── SETUP_GUIDE.md        # Additional setup instructions
+└── init_queries.sql      # Database initialization queries
 ```
+
+## Bill Payment Receipt Download Feature
+
+The system now includes a comprehensive receipt download feature for both customers and administrators:
+
+### For Customers:
+- **Download Receipt:** After paying a bill, customers can download a professional receipt
+- **File Formats:** Choose between TXT (formatted) or CSV (spreadsheet) format
+- **Automatic Button:** "Download Receipt" button enables after successful payment
+- **Content Includes:** Customer details, bill information, amount paid, unique transaction ID, and payment timestamp
+
+### For Administrators:
+- **Download Any Receipt:** Admins can download receipts for any bill from the Manage Bills section
+- **Audit Trail:** Useful for payment verification and customer support
+- **Same Formats:** TXT and CSV export options available
+
+### Receipt Contents:
+```
+- Unique Transaction ID (ELEC-{timestamp})
+- Payment Date & Time
+- Customer Name, Meter Number, Address, RMN
+- Bill Month, Year, Units Consumed, Rate per Unit
+- Amount Paid, Payment Status (PAID)
+```
+
+### Technical Details:
+- No database schema changes required
+- No external dependencies added
+- Uses existing Java Swing components
+- Efficient database queries with join operations
+- Comprehensive error handling with user-friendly messages
 
 ## Prerequisites
 
@@ -108,6 +143,29 @@ Alternatively, if you are using Visual Studio Code with the "Java Extension Pack
 - **Database Connection Errors:** If you encounter issues connecting to the database, double-check your credentials in the `.env` file and ensure your MySQL server is running.
 - **`ClassNotFoundException`:** This error usually means that the classpath is not set correctly. Make sure you are including both the `target/classes` directory and the `lib` directory in your `-cp` argument when running the application.
 - **GUI Issues:** Ensure your Java installation includes support for Swing/AWT. OpenJDK distributions should work fine.
+- **Receipt Download Not Working:** Ensure BillReceipt.java is compiled. If the Download Receipt button is disabled, make sure a bill payment was successful.
+
+## Testing Receipt Download Feature
+
+To test the receipt download functionality:
+
+1. **Compile & Run:** Use the commands above to compile and run the application
+2. **As Customer:**
+   - Login with customer credentials
+   - Navigate to Actions → Pay Bill
+   - Select a pending bill and click "Pay Now"
+   - Enter your password to confirm payment
+   - After success, click "Download Receipt"
+   - Choose TXT or CSV format and save location
+   - Verify receipt file contains all bill details and unique transaction ID
+
+3. **As Admin:**
+   - Login with admin credentials
+   - Navigate to Bill → Manage Bills
+   - Select any bill from the table
+   - Click "Download Receipt"
+   - Choose format and save location
+   - Verify receipt generation works for both paid and pending bills
 
 ## Contributing
 

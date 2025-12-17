@@ -124,9 +124,5 @@ public class Database {
         } catch (Exception e) {
             System.err.println("ERROR: failed to read .env file: " + e.getMessage());
         }
-
-        // Print masked debug info (do not print password value)
-        // System.out.println("\t--- Initiatializing Server ---\nDB_URL :" + (URL == null ? "[NOT SET]" : URL) +
-                // "\nDB_USER : " + (USER == null ? "[NOT SET]" : USER) + "\nDB_PASSWORD : " + (PASSWORD == null ? "[NOT SET]" : "*********"));
     }
 }

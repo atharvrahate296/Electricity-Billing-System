@@ -1,0 +1,44 @@
+════════════════════════════════════════════
+        ELECTRICITY BILLING SYSTEM
+           PAYMENT RECEIPT
+════════════════════════════════════════════
+
+Receipt Number: ELEC-1765996906666
+Payment Date: 18/12/2025 12:11:46 am
+
+────────────────────────────────────────────
+CUSTOMER INFORMATION
+────────────────────────────────────────────
+Customer Name       : Ritvik Rasiq
+Meter Number        : 1389
+Address             : Nagpur Maharashtra
+RMN                 : 93476628989
+
+────────────────────────────────────────────
+BILL DETAILS
+────────────────────────────────────────────
+Billing Month       : October
+Billing Year        : 2025
+Consumption         : 120 units
+Rate                : 4.33 Rate (per unit)
+
+────────────────────────────────────────────
+PAYMENT DETAILS
+────────────────────────────────────────────
+Amount Due          : Rs. 520.00
+Discount Applied    : Rs. 0.00
+Total Paid          : Rs. 520.00
+Payment Method      : Direct Payment
+
+────────────────────────────────────────────
+TRANSACTION INFORMATION
+────────────────────────────────────────────
+Transaction ID      : ELEC-1765996906666
+Bill ID             : 6
+Status              : PAID
+
+════════════════════════════════════════════
+Thank you for paying your electricity bill!
+This is an auto-generated receipt.
+Please keep this for your records.
+════════════════════════════════════════════

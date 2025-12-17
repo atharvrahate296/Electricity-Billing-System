@@ -11,3 +11,7 @@ target/
 .vscode/
 .env
 
+# Extra Markdown file
+./GEMINI.MD
+GEMINI.MD
+
