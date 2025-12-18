@@ -3,38 +3,38 @@
            PAYMENT RECEIPT
 ════════════════════════════════════════════
 
-Receipt Number: ELEC-1765996906666
-Payment Date: 18/12/2025 12:11:46 am
+Receipt Number: ELEC-1766034360167
+Payment Date: 18/12/2025 10:36:00 am
 
 ────────────────────────────────────────────
 CUSTOMER INFORMATION
 ────────────────────────────────────────────
-Customer Name       : Ritvik Rasiq
-Meter Number        : 1389
-Address             : Nagpur Maharashtra
-RMN                 : 93476628989
+Customer Name       : Anagha Vanjari
+Meter Number        : 1360
+Address             : Pune Maharashtra
+RMN                 : 9882663892
 
 ────────────────────────────────────────────
 BILL DETAILS
 ────────────────────────────────────────────
-Billing Month       : October
-Billing Year        : 2025
-Consumption         : 120 units
-Rate                : 4.33 Rate (per unit)
+Billing Month       : November
+Billing Year        : 2024
+Consumption         : 250 units
+Rate                : 5.60 Rate (per unit)
 
 ────────────────────────────────────────────
 PAYMENT DETAILS
 ────────────────────────────────────────────
-Amount Due          : Rs. 520.00
+Amount Due          : Rs. 1400.00
 Discount Applied    : Rs. 0.00
-Total Paid          : Rs. 520.00
+Total Paid          : Rs. 1400.00
 Payment Method      : Direct Payment
 
 ────────────────────────────────────────────
 TRANSACTION INFORMATION
 ────────────────────────────────────────────
-Transaction ID      : ELEC-1765996906666
-Bill ID             : 6
+Transaction ID      : ELEC-1766034360167
+Bill ID             : 10
 Status              : PAID
 
 ════════════════════════════════════════════

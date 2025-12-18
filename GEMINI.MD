@@ -1,6 +1,11 @@
 ## To run the code, use below commands only: 
-bash
+
+### Compile:
+```bash
+javac -d target/classes *.java -cp "lib/*"
 ```
-javac -d target/classes .java -cp "lib/" 
+
+### Run:
+```bash
 java -cp "target/classes;lib/*" App
 ```

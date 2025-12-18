@@ -1,8 +1,11 @@
 Name,Meter ID,Units,Amount,Month,Year,RMN,Address,Status
-Atharv Rahate,1340,135,610.00,September,2025,9302103296,Pune Maharashtra,Pending
-Atharv Rahate,1340,245,1360.00,October,2025,9302103296,Pune Maharashtra,Pending
-Rohit Mehra,1972,550,3800.00,October,2025,0934569817,Nagpur Maharashtra,Pending
-Atharv Rahate,1340,199,994.00,November,2024,9302103296,Pune Maharashtra,Paid
-Atharv Rahate,1340,330,2040.00,November,2025,9302103296,Pune Maharashtra,Pending
-Deepak Gupta,1678,189,934.00,December,2024,7779769817,Satara Maharashtra,Paid
-Ramesh Sahu,1990,198,988.00,October,2025,9303245987,Kothrud Pune Maharashtra,Pending
+Rishabh Singh,1390,188,928.00,December,2025,9785677856,Pune Maharashtra,Paid
+Ritvik Rasiq,1389,145,670.00,November,2024,93476628989,Nagpur Maharashtra,Paid
+Ritvik Rasiq,1389,230,1240.00,December,2024,93476628989,Nagpur Maharashtra,Paid
+Rishabh Singh,1390,123,538.00,November,2025,9785677856,Pune Maharashtra,Pending
+Ritvik Rasiq,1389,222,1176.00,November,2025,93476628989,Nagpur Maharashtra,Paid
+Ritvik Rasiq,1389,120,520.00,October,2025,93476628989,Nagpur Maharashtra,Paid
+Anagha Vanjari,1360,125,550.00,December,2025,9882663892,Pune Maharashtra,Paid
+Anagha Vanjari,1360,239,1312.00,December,2025,9882663892,Pune Maharashtra,Paid
+Shreya Mali,1330,100,400.00,December,2025,9867432897,Kohlapur Maharashtra,Pending
+Anagha Vanjari,1360,250,1400.00,November,2024,9882663892,Pune Maharashtra,Paid
