@@ -90,7 +90,7 @@ The system now includes a comprehensive receipt download feature for both custom
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/atharvrahate296/Electricity-Billing-System
     cd Electricity_Billing_System
     ```
 

@@ -3,38 +3,38 @@
            PAYMENT RECEIPT
 ════════════════════════════════════════════
 
-Receipt Number: ELEC-1766034360167
-Payment Date: 18/12/2025 10:36:00 am
+Receipt Number: ELEC-1766038722256
+Payment Date: 18/12/2025 11:48:42 am
 
 ────────────────────────────────────────────
 CUSTOMER INFORMATION
 ────────────────────────────────────────────
-Customer Name       : Anagha Vanjari
-Meter Number        : 1360
-Address             : Pune Maharashtra
-RMN                 : 9882663892
+Customer Name       : Shreya Mali
+Meter Number        : 1330
+Address             : Kohlapur Maharashtra
+RMN                 : 9867432897
 
 ────────────────────────────────────────────
 BILL DETAILS
 ────────────────────────────────────────────
-Billing Month       : November
-Billing Year        : 2024
-Consumption         : 250 units
-Rate                : 5.60 Rate (per unit)
+Billing Month       : December
+Billing Year        : 2025
+Consumption         : 100 units
+Rate                : 4.00 Rate (per unit)
 
 ────────────────────────────────────────────
 PAYMENT DETAILS
 ────────────────────────────────────────────
-Amount Due          : Rs. 1400.00
+Amount Due          : Rs. 400.00
 Discount Applied    : Rs. 0.00
-Total Paid          : Rs. 1400.00
+Total Paid          : Rs. 400.00
 Payment Method      : Direct Payment
 
 ────────────────────────────────────────────
 TRANSACTION INFORMATION
 ────────────────────────────────────────────
-Transaction ID      : ELEC-1766034360167
-Bill ID             : 10
+Transaction ID      : ELEC-1766038722256
+Bill ID             : 9
 Status              : PAID
 
 ════════════════════════════════════════════
